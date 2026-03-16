@@ -223,7 +223,6 @@ class Calculator:
         for x in range(1, 5):
             self.buttons_frame.rowconfigure(x, weight=1)
             self.buttons_frame.columnconfigure(x, weight=1)
-        self.buttons_frame.columnconfigure(0, weight=1)
 
         self.create_digit_buttons()
         self.create_operator_buttons()
@@ -395,8 +394,6 @@ class Calculator:
             )
 
     def create_special_buttons(self):
-        self.create_history_button()
-        self.create_settings_button()
         self.create_clear_button()
         self.create_equals_button()
         self.create_square_button()
@@ -420,7 +417,7 @@ class Calculator:
         return total_label, label
 
     def create_display_frame(self):
-        # Top bar with settings button
+        # Top bar with history and settings buttons
         top_bar = tk.Frame(self.window, bg=LABEL_COLOR, height=40)
         top_bar.pack(fill="x")
         top_bar.pack_propagate(False)
@@ -432,6 +429,14 @@ class Calculator:
             command=self.open_settings
         )
         settings_btn.pack(side=tk.RIGHT, padx=12, pady=6)
+
+        history_btn = tk.Button(
+            top_bar, text="\U0001F55D History", bg=LABEL_COLOR, fg=WHITE,
+            font=("Arial", 12), borderwidth=0, cursor="hand2",
+            activebackground=LABEL_COLOR, activeforeground=LIGHT_BLUE,
+            command=self.show_history
+        )
+        history_btn.pack(side=tk.RIGHT, padx=4, pady=6)
 
         frame = tk.Frame(self.window, height=221, bg=LIGHT_GRAY)
         frame.pack(expand=True, fill="both")
@@ -488,7 +493,7 @@ class Calculator:
             bg=OFF_WHITE, fg=LABEL_COLOR, font=DEFAULT_FONT_STYLE,
             borderwidth=0, command=self.clear,
         )
-        button.grid(row=0, column=2, sticky=tk.NSEW)
+        button.grid(row=0, column=1, sticky=tk.NSEW)
 
     def create_history_button(self):
         button = tk.Button(
