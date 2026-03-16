@@ -3,7 +3,9 @@ import math
 import json
 import os
 
-SETTINGS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "settings.json")
+SETTINGS_FILE = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "settings.json"
+)
 
 LARGE_FONT_STYLE = ("Arial", 40, "bold")
 SMALL_FONT_STYLE = ("Arial", 16)
@@ -57,7 +59,9 @@ class Calculator:
             1: (3, 1), 2: (3, 2), 3: (3, 3),
             0: (4, 2), '.': (4, 1),
         }
-        self.operations = {"/": "\u00F7", "*": "\u00D7", "-": "-", "+": "+"}
+        self.operations = {
+            "/": "\u00F7", "*": "\u00D7", "-": "-", "+": "+"
+        }
 
         self.display_frame = None
         self.buttons_frame = None
@@ -67,7 +71,7 @@ class Calculator:
         self._build_ui()
         self.bind_keys()
 
-    # ── Settings persistence ──────────────────────────────────────────────────
+    # ── Settings persistence ──────────────────────────────────────────────
 
     def load_settings(self):
         if os.path.exists(SETTINGS_FILE):
@@ -91,12 +95,14 @@ class Calculator:
     def get_theme(self):
         return DARK if self.settings["dark_mode"] else LIGHT
 
-    # ── UI construction ───────────────────────────────────────────────────────
+    # ── UI construction ───────────────────────────────────────────────────
 
     def _build_ui(self):
         """(Re)build the entire UI to reflect current settings."""
         theme = self.get_theme()
-        height = ADVANCED_HEIGHT if self.settings["advanced_mode"] else BASIC_HEIGHT
+        height = (
+            ADVANCED_HEIGHT if self.settings["advanced_mode"] else BASIC_HEIGHT
+        )
         self.window.geometry(f"{WIDTH}x{height}")
         self.window.configure(bg=theme["bg"])
 
@@ -116,7 +122,8 @@ class Calculator:
         frame.pack(expand=True, fill="both")
 
         settings_btn = tk.Button(
-            frame, text="\u2699", bg=theme["display_bg"], fg=theme["text"],
+            frame, text="\u2699",
+            bg=theme["display_bg"], fg=theme["text"],
             font=("Arial", 16), borderwidth=0, relief="flat",
             command=self.open_settings,
         )
@@ -127,14 +134,24 @@ class Calculator:
     def _create_display_labels(self):
         theme = self.get_theme()
         total_label = tk.Label(
-            self.display_frame, text=self.total_expression, anchor=tk.E,
-            bg=theme["display_bg"], fg=theme["text"], padx=24, font=SMALL_FONT_STYLE,
+            self.display_frame,
+            text=self.total_expression,
+            anchor=tk.E,
+            bg=theme["display_bg"],
+            fg=theme["text"],
+            padx=24,
+            font=SMALL_FONT_STYLE,
         )
         total_label.pack(expand=True, fill="both")
 
         label = tk.Label(
-            self.display_frame, text=self.current_expression, anchor=tk.E,
-            bg=theme["display_bg"], fg=theme["text"], padx=24, font=LARGE_FONT_STYLE,
+            self.display_frame,
+            text=self.current_expression,
+            anchor=tk.E,
+            bg=theme["display_bg"],
+            fg=theme["text"],
+            padx=24,
+            font=LARGE_FONT_STYLE,
         )
         label.pack(expand=True, fill="both")
 
@@ -166,35 +183,37 @@ class Calculator:
     def _create_advanced_buttons(self):
         theme = self.get_theme()
         buttons = [
-            ("sin",       self.calc_sin,      0, 1),
-            ("cos",       self.calc_cos,      0, 2),
-            ("tan",       self.calc_tan,      0, 3),
-            ("log",       self.calc_log,      0, 4),
-            ("ln",        self.calc_ln,       1, 1),
-            ("e\u02e3",   self.calc_exp,      1, 2),
-            ("\u03c0",    self.insert_pi,     1, 3),
-            ("x^y",       self.insert_power,  1, 4),
+            ("sin",     self.calc_sin,     0, 1),
+            ("cos",     self.calc_cos,     0, 2),
+            ("tan",     self.calc_tan,     0, 3),
+            ("log",     self.calc_log,     0, 4),
+            ("ln",      self.calc_ln,      1, 1),
+            ("e\u02e3", self.calc_exp,     1, 2),
+            ("\u03c0",  self.insert_pi,    1, 3),
+            ("x^y",     self.insert_power, 1, 4),
         ]
         for text, cmd, r, c in buttons:
             btn = tk.Button(
-                self.buttons_frame, text=text, bg=theme["advanced"],
-                fg=theme["text"], font=ADV_FONT_STYLE, borderwidth=0, command=cmd,
+                self.buttons_frame, text=text,
+                bg=theme["advanced"], fg=theme["text"],
+                font=ADV_FONT_STYLE, borderwidth=0, command=cmd,
             )
             btn.grid(row=r, column=c, sticky=tk.NSEW)
 
     def _create_special_buttons(self, offset=0):
         theme = self.get_theme()
         specials = [
-            ("C",         self.clear,    offset,     1, False),
+            ("C",        self.clear,    offset,     1, False),
             ("x\u00b2",  self.square,   offset,     2, False),
-            ("\u221ax",   self.sqrt,     offset,     3, False),
-            ("=",         self.evaluate, offset + 4, 3, True),
+            ("\u221ax",  self.sqrt,     offset,     3, False),
+            ("=",        self.evaluate, offset + 4, 3, True),
         ]
         for text, cmd, r, c, is_equals in specials:
             btn = tk.Button(
                 self.buttons_frame, text=text,
                 bg=theme["equals"] if is_equals else theme["special"],
-                fg=theme["text"], font=DEFAULT_FONT_STYLE, borderwidth=0, command=cmd,
+                fg=theme["text"],
+                font=DEFAULT_FONT_STYLE, borderwidth=0, command=cmd,
             )
             if is_equals:
                 btn.grid(row=r, column=c, columnspan=2, sticky=tk.NSEW)
@@ -205,8 +224,9 @@ class Calculator:
         theme = self.get_theme()
         for i, (operator, symbol) in enumerate(self.operations.items()):
             btn = tk.Button(
-                self.buttons_frame, text=symbol, bg=theme["operator"],
-                fg=theme["text"], font=DEFAULT_FONT_STYLE, borderwidth=0,
+                self.buttons_frame, text=symbol,
+                bg=theme["operator"], fg=theme["text"],
+                font=DEFAULT_FONT_STYLE, borderwidth=0,
                 command=lambda x=operator: self.append_operator(x),
             )
             btn.grid(row=i + offset, column=4, sticky=tk.NSEW)
@@ -215,13 +235,14 @@ class Calculator:
         theme = self.get_theme()
         for digit, (r, c) in self.digits.items():
             btn = tk.Button(
-                self.buttons_frame, text=str(digit), bg=theme["digit"],
-                fg=theme["text"], font=DIGITS_FONT_STYLE, borderwidth=0,
+                self.buttons_frame, text=str(digit),
+                bg=theme["digit"], fg=theme["text"],
+                font=DIGITS_FONT_STYLE, borderwidth=0,
                 command=lambda x=digit: self.add_to_expression(x),
             )
             btn.grid(row=r + offset, column=c, sticky=tk.NSEW)
 
-    # ── Settings window ───────────────────────────────────────────────────────
+    # ── Settings window ───────────────────────────────────────────────────
 
     def open_settings(self):
         theme = self.get_theme()
@@ -236,18 +257,23 @@ class Calculator:
         adv_var = tk.BooleanVar(value=self.settings["advanced_mode"])
 
         tk.Label(
-            win, text="Settings", bg=theme["display_bg"], fg=theme["text"],
+            win, text="Settings",
+            bg=theme["display_bg"], fg=theme["text"],
             font=("Arial", 18, "bold"),
         ).pack(pady=(16, 12))
 
         chk_kw = dict(
             bg=theme["display_bg"], fg=theme["text"],
             selectcolor=theme["digit"], font=("Arial", 13),
-            activebackground=theme["display_bg"], activeforeground=theme["text"],
+            activebackground=theme["display_bg"],
+            activeforeground=theme["text"],
         )
-        tk.Checkbutton(win, text="Dark Mode", variable=dark_var, **chk_kw).pack(anchor="w", padx=30)
         tk.Checkbutton(
-            win, text="Advanced Mode  (Log, Exp, Trig)", variable=adv_var, **chk_kw
+            win, text="Dark Mode", variable=dark_var, **chk_kw
+        ).pack(anchor="w", padx=30)
+        tk.Checkbutton(
+            win, text="Advanced Mode  (Log, Exp, Trig)",
+            variable=adv_var, **chk_kw,
         ).pack(anchor="w", padx=30)
 
         def apply_settings():
@@ -273,16 +299,22 @@ class Calculator:
             font=("Arial", 12), padx=16, pady=6, borderwidth=0,
         ).pack(side=tk.LEFT, padx=8)
 
-    # ── Key bindings ──────────────────────────────────────────────────────────
+    # ── Key bindings ──────────────────────────────────────────────────────
 
     def bind_keys(self):
         self.window.bind("<Return>", lambda event: self.evaluate())
         for key in self.digits:
-            self.window.bind(str(key), lambda event, d=key: self.add_to_expression(d))
+            self.window.bind(
+                str(key),
+                lambda event, d=key: self.add_to_expression(d),
+            )
         for key in self.operations:
-            self.window.bind(key, lambda event, op=key: self.append_operator(op))
+            self.window.bind(
+                key,
+                lambda event, op=key: self.append_operator(op),
+            )
 
-    # ── Basic calculator operations ───────────────────────────────────────────
+    # ── Basic calculator operations ───────────────────────────────────────
 
     def add_to_expression(self, value):
         self.current_expression += str(value)
@@ -303,14 +335,18 @@ class Calculator:
 
     def square(self):
         try:
-            self.current_expression = str(eval(f"{self.current_expression}**2"))
+            self.current_expression = str(
+                eval(f"{self.current_expression}**2")
+            )
         except Exception:
             self.current_expression = "Error"
         self.update_label()
 
     def sqrt(self):
         try:
-            self.current_expression = str(eval(f"{self.current_expression}**0.5"))
+            self.current_expression = str(
+                eval(f"{self.current_expression}**0.5")
+            )
         except Exception:
             self.current_expression = "Error"
         self.update_label()
@@ -326,7 +362,7 @@ class Calculator:
         finally:
             self.update_label()
 
-    # ── Advanced math operations ──────────────────────────────────────────────
+    # ── Advanced math operations ──────────────────────────────────────────
 
     def _apply_math(self, fn):
         """Apply a single-argument math function to the current expression."""
@@ -366,7 +402,7 @@ class Calculator:
         self.update_total_label()
         self.update_label()
 
-    # ── Display helpers ───────────────────────────────────────────────────────
+    # ── Display helpers ───────────────────────────────────────────────────
 
     def update_total_label(self):
         expression = self.total_expression
