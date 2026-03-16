@@ -522,7 +522,6 @@ class Calculator:
         )
         button.grid(row=0, column=2, sticky=tk.NSEW)
 
-
     def sqrt(self):
         self.current_expression = str(eval(f"{self.current_expression}**0.5"))
         self.update_label()
