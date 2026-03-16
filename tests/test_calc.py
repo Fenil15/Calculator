@@ -245,6 +245,16 @@ class TestSettingsScreen(unittest.TestCase):
         
         self.assertEqual(screen.settings['decimal_precision'], 8)
 
+    def test_settings_screen_history_retention_in_settings(self):
+        """Test that history retention is included in settings."""
+        settings = {'theme': 'Light', 'history_retention_days': 30}
+        on_save_callback = mock.MagicMock()
+        
+        screen = self.calc.SettingsScreen(None, settings, on_save_callback)
+        
+        # Verify history_retention_days is in settings
+        self.assertIn('history_retention_days', screen.settings)
+
 
 class TestTheme(unittest.TestCase):
     """Test theme functionality."""
