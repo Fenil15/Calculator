@@ -289,7 +289,9 @@ class Calculator:
                 fg=LABEL_COLOR, font=DIGITS_FONT_STYLE, borderwidth=0,
                 command=lambda x=digit: self.add_to_expression(x)
             )
-            button.grid(row=grid_value[0], column=grid_value[1], sticky=tk.NSEW)
+            button.grid(
+                row=grid_value[0], column=grid_value[1], sticky=tk.NSEW
+            )
 
     def append_operator(self, operator):
         self.current_expression += operator
