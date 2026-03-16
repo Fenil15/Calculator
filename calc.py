@@ -19,6 +19,14 @@ LABEL_COLOR = "#25265E"
 SETTINGS_BG = "#F0F4FF"
 BUTTON_HOVER = "#B0D4F5"
 
+# Dark theme colors
+DARK_BG = "#1E1E1E"
+DARK_FRAME_BG = "#2D2D2D"
+DARK_LABEL_COLOR = "#FFFFFF"
+DARK_BUTTON_BG = "#3D3D3D"
+DARK_TEXT_COLOR = "#E0E0E0"
+DARK_ACCENT = "#4A90D9"
+
 DEFAULT_SETTINGS = {
     "theme": "Light",
     "decimal_precision": 10,
@@ -202,7 +210,8 @@ class Calculator:
         self.window.resizable(0, 0)
         self.window.title("Calculator")
 
-        self.settings = dict(DEFAULT_SETTINGS)
+        # Store references for theme updates
+        self.widget_references = []
 
         self.total_expression = ""
         self.current_expression = ""
@@ -228,6 +237,9 @@ class Calculator:
         self.create_operator_buttons()
         self.create_special_buttons()
         self.bind_keys()
+        
+        # Apply saved theme on startup
+        self.apply_theme(self.settings.get("theme", "Light"))
 
     # ── Settings ──────────────────────────────────────────────────────────────
 
@@ -394,6 +406,9 @@ class Calculator:
             )
 
     def create_special_buttons(self):
+        self.special_buttons = []
+        self.create_history_button()
+        self.create_settings_button()
         self.create_clear_button()
         self.create_equals_button()
         self.create_square_button()
@@ -446,13 +461,62 @@ class Calculator:
         SettingsScreen(self.window, self.settings, self._apply_settings)
 
     def _apply_settings(self, new_settings):
+        old_theme = self.settings.get("theme", "Light")
         self.settings = new_settings
+        
+        # Apply theme if it changed
+        new_theme = self.settings.get("theme", "Light")
+        if old_theme != new_theme:
+            self.apply_theme(new_theme)
+    
+    def apply_theme(self, theme):
+        """Apply theme colors to all calculator widgets."""
+        if theme == "Dark":
+            bg = DARK_BG
+            fg = DARK_TEXT_COLOR
+            accent = DARK_ACCENT
+            button_bg = DARK_BUTTON_BG
+        else:  # Light
+            bg = LIGHT_GRAY
+            fg = LABEL_COLOR
+            accent = LIGHT_BLUE
+            button_bg = WHITE
+        
+        # Apply to main window
+        self.window.configure(bg=bg)
+        
+        # Apply to display frame
+        self.display_frame.configure(bg=bg)
+        
+        # Apply to labels
+        self.total_label.configure(bg=bg, fg=fg)
+        self.label.configure(bg=bg, fg=fg)
+        
+        # Apply to buttons frame
+        self.buttons_frame.configure(bg=bg)
+        
+        # Apply to all digit buttons
+        for btn in getattr(self, 'digit_buttons', []):
+            btn.configure(bg=button_bg, fg=fg)
+        
+        # Apply to operator buttons
+        for btn in getattr(self, 'operator_buttons', []):
+            btn.configure(bg=OFF_WHITE, fg=fg)
+        
+        # Apply to special buttons
+        for btn in getattr(self, 'special_buttons', []):
+            btn.configure(bg=OFF_WHITE, fg=fg)
+        
+        # Apply to equals button
+        if hasattr(self, 'equals_button'):
+            self.equals_button.configure(bg=accent, fg=fg)
 
     def add_to_expression(self, value):
         self.current_expression += str(value)
         self.update_label()
 
     def create_digit_buttons(self):
+        self.digit_buttons = []
         for digit, grid_value in self.digits.items():
             button = tk.Button(
                 self.buttons_frame, text=str(digit), bg=WHITE,
@@ -462,6 +526,7 @@ class Calculator:
             button.grid(
                 row=grid_value[0], column=grid_value[1], sticky=tk.NSEW
             )
+            self.digit_buttons.append(button)
 
     def append_operator(self, operator):
         self.current_expression += operator
@@ -471,6 +536,7 @@ class Calculator:
         self.update_label()
 
     def create_operator_buttons(self):
+        self.operator_buttons = []
         i = 0
         for operator, symbol in self.operations.items():
             button = tk.Button(
@@ -479,6 +545,7 @@ class Calculator:
                 command=lambda x=operator: self.append_operator(x)
             )
             button.grid(row=i, column=4, sticky=tk.NSEW)
+            self.operator_buttons.append(button)
             i += 1
 
     def clear(self):
@@ -493,7 +560,8 @@ class Calculator:
             bg=OFF_WHITE, fg=LABEL_COLOR, font=DEFAULT_FONT_STYLE,
             borderwidth=0, command=self.clear,
         )
-        button.grid(row=0, column=1, sticky=tk.NSEW)
+        button.grid(row=0, column=2, sticky=tk.NSEW)
+        self.special_buttons.append(button)
 
     def create_history_button(self):
         button = tk.Button(
@@ -502,6 +570,7 @@ class Calculator:
             borderwidth=0, command=self.show_history,
         )
         button.grid(row=0, column=0, sticky=tk.NSEW)
+        self.special_buttons.append(button)
 
     def create_settings_button(self):
         button = tk.Button(
@@ -510,6 +579,7 @@ class Calculator:
             borderwidth=0, command=self.show_settings,
         )
         button.grid(row=0, column=1, sticky=tk.NSEW)
+        self.special_buttons.append(button)
 
     def square(self):
         self.current_expression = str(eval(f"{self.current_expression}**2"))
@@ -521,6 +591,7 @@ class Calculator:
             font=DEFAULT_FONT_STYLE, borderwidth=0, command=self.square
         )
         button.grid(row=0, column=2, sticky=tk.NSEW)
+        self.special_buttons.append(button)
 
     def sqrt(self):
         self.current_expression = str(eval(f"{self.current_expression}**0.5"))
@@ -532,6 +603,7 @@ class Calculator:
             font=DEFAULT_FONT_STYLE, borderwidth=0, command=self.sqrt
         )
         button.grid(row=0, column=3, sticky=tk.NSEW)
+        self.special_buttons.append(button)
 
     def evaluate(self):
         self.total_expression += self.current_expression
@@ -548,12 +620,12 @@ class Calculator:
             self.update_label()
 
     def create_equals_button(self):
-        button = tk.Button(
+        self.equals_button = tk.Button(
             self.buttons_frame, text="=",
             bg=LIGHT_BLUE, fg=LABEL_COLOR, font=DEFAULT_FONT_STYLE,
             borderwidth=0, command=self.evaluate,
         )
-        button.grid(row=4, column=3, columnspan=2, sticky=tk.NSEW)
+        self.equals_button.grid(row=4, column=3, columnspan=2, sticky=tk.NSEW)
 
     def create_buttons_frame(self):
         frame = tk.Frame(self.window)

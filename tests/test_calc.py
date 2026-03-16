@@ -246,5 +246,66 @@ class TestSettingsScreen(unittest.TestCase):
         self.assertEqual(screen.settings['decimal_precision'], 8)
 
 
+class TestTheme(unittest.TestCase):
+    """Test theme functionality."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        # Mock the tkinter module
+        self.mock_tkinter = mock.MagicMock()
+        self.mock_tkinter.Tk.return_value = mock.MagicMock()
+        self.mock_tkinter.Toplevel.return_value = mock.MagicMock()
+        self.mock_tkinter.StringVar.return_value = mock.MagicMock()
+        self.mock_tkinter.IntVar.return_value = mock.MagicMock()
+        self.mock_tkinter.TclError = Exception
+        
+        # Patch tkinter globally
+        self.tkinter_patcher = mock.patch.dict('sys.modules', {'tkinter': self.mock_tkinter})
+        self.tkinter_patcher.start()
+        
+        # Need to reload calc module to use mocked tkinter
+        if 'calc' in sys.modules:
+            del sys.modules['calc']
+        
+        import calc
+        self.calc = calc
+        
+    def tearDown(self):
+        """Clean up after tests."""
+        self.tkinter_patcher.stop()
+
+    def test_apply_theme_light(self):
+        """Test applying light theme."""
+        # Create Calculator instance
+        with mock.patch.object(self.calc.Calculator, 'load_settings', return_value={'history_retention_days': 30}):
+            with mock.patch.object(self.calc.Calculator, 'purge_old_history'):
+                calc_obj = self.calc.Calculator()
+        
+        # Call apply_theme
+        calc_obj.apply_theme("Light")
+        
+        # Verify widget configurations were called
+        calc_obj.window.configure.assert_called()
+        calc_obj.display_frame.configure.assert_called()
+        calc_obj.total_label.configure.assert_called()
+        calc_obj.label.configure.assert_called()
+
+    def test_apply_theme_dark(self):
+        """Test applying dark theme."""
+        # Create Calculator instance
+        with mock.patch.object(self.calc.Calculator, 'load_settings', return_value={'history_retention_days': 30}):
+            with mock.patch.object(self.calc.Calculator, 'purge_old_history'):
+                calc_obj = self.calc.Calculator()
+        
+        # Call apply_theme
+        calc_obj.apply_theme("Dark")
+        
+        # Verify widget configurations were called
+        calc_obj.window.configure.assert_called()
+        calc_obj.display_frame.configure.assert_called()
+        calc_obj.total_label.configure.assert_called()
+        calc_obj.label.configure.assert_called()
+
+
 if __name__ == '__main__':
     unittest.main()
