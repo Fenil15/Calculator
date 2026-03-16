@@ -99,6 +99,15 @@ class SettingsScreen:
             "angle_unit"
         )
 
+        # History retention days
+        self._add_section_label(content, "History")
+        self._add_spinbox_row(
+            content, "Keep history for (days)",
+            1, 365,
+            self.settings.get("history_retention_days", 30),
+            "history_retention_days"
+        )
+
         # Save button
         save_btn = tk.Button(
             self.window, text="Save", bg=LIGHT_BLUE, fg=LABEL_COLOR,
@@ -174,7 +183,7 @@ class SettingsScreen:
 
     def _save(self):
         # Sync spinbox value (Spinbox command fires before value updates)
-        for key in ("decimal_precision",):
+        for key in ("decimal_precision", "history_retention_days"):
             var = getattr(self, f"_var_{key}", None)
             if var:
                 try:
